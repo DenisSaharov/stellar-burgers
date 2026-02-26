@@ -8,19 +8,26 @@ export const Register: FC = () => {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorText, setErrorText] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(register({ email, password, name: userName })).then(() => {
-      navigate('/');
-    });
+    setErrorText('');
+    dispatch(register({ email, password, name: userName }))
+      .unwrap()
+      .then(() => {
+        navigate('/');
+      })
+      .catch((error) => {
+        setErrorText(error?.message || 'Не удалось зарегистрироваться');
+      });
   };
 
   return (
     <RegisterUI
-      errorText=''
+      errorText={errorText}
       email={email}
       userName={userName}
       password={password}

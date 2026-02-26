@@ -7,7 +7,7 @@ import {
   logoutApi
 } from '../../utils/burger-api';
 import { TUser } from '../../utils/types';
-import { deleteCookie } from '../../utils/cookie';
+import { deleteCookie, setCookie } from '../../utils/cookie';
 
 type TAuthState = {
   user: TUser | null;
@@ -27,6 +27,8 @@ export const login = createAsyncThunk(
   'auth/login',
   async (data: { email: string; password: string }) => {
     const response = await loginUserApi(data);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
     return response.user;
   }
 );
@@ -35,6 +37,8 @@ export const register = createAsyncThunk(
   'auth/register',
   async (data: { email: string; password: string; name: string }) => {
     const response = await registerUserApi(data);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
     return response.user;
   }
 );

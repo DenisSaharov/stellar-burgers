@@ -24,6 +24,7 @@ import { AppHeader, ProtectedRoute, Modal } from '@components';
 import { OrderInfo, IngredientDetails } from '@components';
 import { useDispatch } from '../../services/store';
 import { getUser } from '../../services/slices/authSlice';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 import { getCookie } from '../../utils/cookie';
 
 const AppContent = () => {
@@ -34,6 +35,7 @@ const AppContent = () => {
   const background = location.state?.background;
 
   useEffect(() => {
+    dispatch(fetchIngredients());
     if (getCookie('accessToken')) {
       dispatch(getUser());
     }
@@ -42,14 +44,6 @@ const AppContent = () => {
   const handleCloseModal = () => {
     navigate(-1);
   };
-
-  const feedMatch = location.pathname.match(/^\/feed\/(\d+)$/);
-  const ingredientMatch = location.pathname.match(
-    /^\/ingredients\/([a-f0-9]+)$/
-  );
-  const profileOrderMatch = location.pathname.match(
-    /^\/profile\/orders\/(\d+)$/
-  );
 
   return (
     <div className={styles.app}>
@@ -105,28 +99,47 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         />
-        <Route path='/feed/:number' element={null} />
-        <Route path='/ingredients/:id' element={null} />
-        <Route path='/profile/orders/:number' element={null} />
+        <Route path='/feed/:number' element={<OrderInfo />} />
+        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
         <Route path='*' element={<NotFound404 />} />
       </Routes>
-      {feedMatch && (
-        <Modal title={`Заказ #${feedMatch[1]}`} onClose={handleCloseModal}>
-          <OrderInfo />
-        </Modal>
-      )}
-      {ingredientMatch && (
-        <Modal title='Детали ингредиента' onClose={handleCloseModal}>
-          <IngredientDetails />
-        </Modal>
-      )}
-      {profileOrderMatch && (
-        <Modal
-          title={`Заказ #${profileOrderMatch[1]}`}
-          onClose={handleCloseModal}
-        >
-          <OrderInfo />
-        </Modal>
+      {background && (
+        <Routes>
+          <Route
+            path='/feed/:number'
+            element={
+              <Modal title='Информация о заказе' onClose={handleCloseModal}>
+                <OrderInfo />
+              </Modal>
+            }
+          />
+          <Route
+            path='/ingredients/:id'
+            element={
+              <Modal title='Детали ингредиента' onClose={handleCloseModal}>
+                <IngredientDetails />
+              </Modal>
+            }
+          />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <Modal title='Информация о заказе' onClose={handleCloseModal}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       )}
     </div>
   );

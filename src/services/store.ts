@@ -9,12 +9,16 @@ import ingredientsSlice from './slices/ingredientsSlice';
 import authSlice from './slices/authSlice';
 import orderSlice from './slices/orderSlice';
 import userOrdersSlice from './slices/userOrdersSlice';
+import feedsSlice from './slices/feedsSlice';
+import constructorSlice from './slices/constructorSlice';
 
 const rootReducer = {
   ingredients: ingredientsSlice,
+  burgerConstructor: constructorSlice,
   auth: authSlice,
   order: orderSlice,
-  userOrders: userOrdersSlice
+  userOrders: userOrdersSlice,
+  feeds: feedsSlice
 };
 
 const store = configureStore({

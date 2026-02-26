@@ -5,22 +5,23 @@ import { BurgerConstructorUI } from '@ui';
 import { getCookie } from '../../utils/cookie';
 import { useDispatch, useSelector } from '../../services/store';
 import { createOrder } from '../../services/slices/orderSlice';
-import { selectOrderLoading } from '../../services/selectors/orderSelectors';
+import {
+  selectOrder,
+  selectOrderLoading
+} from '../../services/selectors/orderSelectors';
+import { selectConstructorItems } from '../../services/selectors/constructorSelectors';
+import { clearConstructor } from '../../services/slices/constructorSlice';
+import { clearOrder } from '../../services/slices/orderSlice';
 
 export const BurgerConstructor: FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const orderLoading = useSelector(selectOrderLoading);
-
-  /** TODO: взять переменные constructorItems, orderRequest и orderModalData из стора */
-  const constructorItems = {
-    bun: null as TConstructorIngredient | null,
-    ingredients: [] as TConstructorIngredient[]
-  };
+  const constructorItems = useSelector(selectConstructorItems);
 
   const orderRequest = orderLoading;
 
-  const orderModalData = null; // TODO: взять из store
+  const orderModalData = useSelector(selectOrder);
 
   const onOrderClick = () => {
     if (!constructorItems.bun || orderRequest) return;
@@ -34,9 +35,16 @@ export const BurgerConstructor: FC = () => {
       ...constructorItems.ingredients.map((item) => item._id),
       ...(constructorItems.bun ? [constructorItems.bun._id] : [])
     ];
-    dispatch(createOrder(ingredients));
+    dispatch(createOrder(ingredients))
+      .unwrap()
+      .then(() => {
+        dispatch(clearConstructor());
+      })
+      .catch(() => undefined);
   };
-  const closeOrderModal = () => {};
+  const closeOrderModal = () => {
+    dispatch(clearOrder());
+  };
 
   const price = useMemo(
     () =>
