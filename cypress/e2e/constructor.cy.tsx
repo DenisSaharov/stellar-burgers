@@ -1,3 +1,24 @@
+const SELECTORS = {
+  ingredientItem: 'li',
+  ingredientLink: 'a',
+  modalRoot: '#modals',
+  closeIcon: 'svg'
+} as const;
+
+const TEXT = {
+  bunName: 'Тестовая булка',
+  mainName: 'Тестовая начинка',
+  addButton: 'Добавить',
+  bunTop: 'Тестовая булка (верх)',
+  bunBottom: 'Тестовая булка (низ)',
+  ingredientDetailsTitle: 'Детали ингредиента',
+  calories: 'Калории, ккал',
+  orderButton: 'Оформить заказ',
+  orderNumber: '12345',
+  chooseBuns: 'Выберите булки',
+  chooseFilling: 'Выберите начинку'
+} as const;
+
 describe('Burger constructor page', () => {
   beforeEach(() => {
     cy.intercept('GET', '**/api/ingredients', { fixture: 'ingredients.json' }).as('getIngredients');
@@ -16,31 +37,42 @@ describe('Burger constructor page', () => {
   });
 
   it('adds bun and filling ingredients to constructor', () => {
-    cy.contains('li', 'Тестовая булка').contains('Добавить').click();
-    cy.contains('li', 'Тестовая начинка').contains('Добавить').click();
+    cy.contains(SELECTORS.ingredientItem, TEXT.bunName)
+      .contains(TEXT.addButton)
+      .click();
+    cy.contains(SELECTORS.ingredientItem, TEXT.mainName)
+      .contains(TEXT.addButton)
+      .click();
 
-    cy.contains('Тестовая булка (верх)').should('exist');
-    cy.contains('Тестовая булка (низ)').should('exist');
-    cy.contains('Тестовая начинка').should('exist');
+    cy.contains(TEXT.bunTop).should('exist');
+    cy.contains(TEXT.bunBottom).should('exist');
+    cy.contains(TEXT.mainName).should('exist');
   });
 
   it('opens and closes ingredient modal by close button', () => {
-    cy.contains('li', 'Тестовая булка').find('a').click();
+    cy.contains(SELECTORS.ingredientItem, TEXT.bunName)
+      .find(SELECTORS.ingredientLink)
+      .click();
 
-    cy.contains('Детали ингредиента').should('exist');
-    cy.get('#modals').should('contain', 'Тестовая булка');
-    cy.contains('Калории, ккал').should('exist');
+    cy.contains(TEXT.ingredientDetailsTitle).should('exist');
+    cy.get(SELECTORS.modalRoot).should('contain', TEXT.bunName);
+    cy.contains(TEXT.calories).should('exist');
 
-    cy.get('#modals').find('svg').first().click({ force: true });
-    cy.get('#modals').should('not.contain', 'Детали ингредиента');
+    cy.get(SELECTORS.modalRoot)
+      .find(SELECTORS.closeIcon)
+      .first()
+      .click({ force: true });
+    cy.get(SELECTORS.modalRoot).should('not.contain', TEXT.ingredientDetailsTitle);
   });
 
   it('opens and closes ingredient modal by overlay click', () => {
-    cy.contains('li', 'Тестовая булка').find('a').click();
-    cy.contains('Детали ингредиента').should('exist');
+    cy.contains(SELECTORS.ingredientItem, TEXT.bunName)
+      .find(SELECTORS.ingredientLink)
+      .click();
+    cy.contains(TEXT.ingredientDetailsTitle).should('exist');
 
-    cy.get('#modals').children().last().click({ force: true });
-    cy.get('#modals').should('not.contain', 'Детали ингредиента');
+    cy.get(SELECTORS.modalRoot).children().last().click({ force: true });
+    cy.get(SELECTORS.modalRoot).should('not.contain', TEXT.ingredientDetailsTitle);
   });
 
   it('creates order and clears constructor after modal close', () => {
@@ -53,18 +85,25 @@ describe('Burger constructor page', () => {
     cy.wait('@getIngredients');
     cy.wait('@getUser');
 
-    cy.contains('li', 'Тестовая булка').contains('Добавить').click();
-    cy.contains('li', 'Тестовая начинка').contains('Добавить').click();
+    cy.contains(SELECTORS.ingredientItem, TEXT.bunName)
+      .contains(TEXT.addButton)
+      .click();
+    cy.contains(SELECTORS.ingredientItem, TEXT.mainName)
+      .contains(TEXT.addButton)
+      .click();
 
-    cy.contains('Оформить заказ').click();
+    cy.contains(TEXT.orderButton).click();
     cy.wait('@createOrder');
 
-    cy.contains('12345').should('exist');
+    cy.contains(TEXT.orderNumber).should('exist');
 
-    cy.get('#modals').find('svg').first().click({ force: true });
-    cy.get('#modals').should('not.contain', '12345');
+    cy.get(SELECTORS.modalRoot)
+      .find(SELECTORS.closeIcon)
+      .first()
+      .click({ force: true });
+    cy.get(SELECTORS.modalRoot).should('not.contain', TEXT.orderNumber);
 
-    cy.contains('Выберите булки').should('exist');
-    cy.contains('Выберите начинку').should('exist');
+    cy.contains(TEXT.chooseBuns).should('exist');
+    cy.contains(TEXT.chooseFilling).should('exist');
   });
 });
